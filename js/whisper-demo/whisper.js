@@ -3,7 +3,7 @@ import { AutoProcessor, AutoTokenizer } from 'https://cdn.jsdelivr.net/npm/@xeno
 //'@xenova/transformers';
 import { get_new_tokens } from './generation_utils.js';
 import { attention_mask_update, cache_update } from './post_processing.js';
-import {log, getModelOPFS, convertToFloat32Array, convertToUint16Array} from './utils.js';
+import { log, getModelOPFS, convertToFloat32Array, convertToUint16Array } from './utils.js';
 
 // wrapper around onnxruntime and model
 export class Whisper {
@@ -26,6 +26,9 @@ export class Whisper {
         this.sampling_rate = 16000;
         this.processor = null;
         this.tokenizer = null;
+        this.pad_session = null;
+        this.scatternd_session = null;
+        this.indices = new ort.Tensor('int64', new BigInt64Array(24), [1, 8, 1, 3]); // used for replace kv cache
     }
 
     async create_whisper_processor() {
@@ -46,6 +49,12 @@ export class Whisper {
             }],
         };
 
+        try {
+            this.pad_session = await ort.InferenceSession.create('/models/pad.onnx');
+            this.scatternd_session = await ort.InferenceSession.create('/models/scatternd.onnx');
+        } catch (e) {
+            log(`Error: ${e}`);
+        }
         for (let name of Object.keys(this.models)) {
             try {
                 let url = this.url + this.models[name]['url'];
@@ -133,27 +142,36 @@ export class Whisper {
 
         // fill decoder kv cache model inputs with cross attention KV cache data from decoder 1st inference
         for (let i = 0; i < 6; i++) {
+            // encoder key/value
             decoder_input[`past_key_values.${i}.encoder.key`] = decoder_output[`present_key_values.${i}.encoder.key`];
             decoder_input[`past_key_values.${i}.encoder.value`] = decoder_output[`present_key_values.${i}.encoder.value`];
+
+            // pad decoder key/value
+            const key_feeds = { 'input': decoder_output[`present_key_values.${i}.decoder.key`] };
+            const value_feeds = { 'input': decoder_output[`present_key_values.${i}.decoder.value`] };
+            const key_results = await this.pad_session.run(key_feeds);
+            const value_results = await this.pad_session.run(value_feeds);
+            decoder_input[`past_key_values.${i}.decoder.key`] = key_results.output;
+            decoder_input[`past_key_values.${i}.decoder.value`] = value_results.output;
         }
 
         // modify the self attention kv cache in place
-        cache_update(
-            decoder_input,
-            decoder_output,
-            0,
-            this.max_sequence_length,
-            this.num_init_tokens,
-            this.num_init_tokens,
-            this.dataType);
+        // cache_update(
+        //     decoder_input,
+        //     decoder_output,
+        //     0,
+        //     this.max_sequence_length,
+        //     this.num_init_tokens,
+        //     this.num_init_tokens,
+        //     this.dataType);
 
         const position_ids = new Int32Array(decoder_input['position_ids'].cpuData.buffer);
         // run complete inference for every item in dataset
         for (let i = 4; i < this.max_sequence_length; i++) {
-            console.log(`  decoder iteration ${i-3}: input preparation time: ${(performance.now() - start).toFixed(2)} ms`);
+            console.log(`  decoder iteration ${i - 3}: input preparation time: ${(performance.now() - start).toFixed(2)} ms`);
             start = performance.now();
             const decoder_cached_output = await this.models['decoder_cached']['sess'].run(decoder_input);
-            console.log(`  decoder iteration ${i-3}: inference time: ${(performance.now() - start).toFixed(2)} ms`);
+            console.log(`  decoder iteration ${i - 3}: inference time: ${(performance.now() - start).toFixed(2)} ms`);
             start = performance.now();
             // find out the token with highest probability, cast INT64 to INT32
             let logits = decoder_cached_output['logits']['cpuData'];
@@ -165,7 +183,8 @@ export class Whisper {
             // add token to final buffer
             tokens = tokens.concat(new_token);
             // break if the new token is eos_token_id: 50257 (end of sequence)
-            if (new_token == 50257) {
+            // or the max sequence length is reached
+            if (new_token == 50257 || i == this.max_sequence_length - 1) {
                 break;
             }
             // ----------------------------------POST PROCESSING---------------------------------------
@@ -178,9 +197,35 @@ export class Whisper {
             // update mask using position id
             attention_mask_update(decoder_input['attention_mask'].cpuData, i, this.max_sequence_length, this.num_init_tokens, position_ids[0]);
             // modify the kv cache in place
-            cache_update(decoder_input, decoder_cached_output, i, this.max_sequence_length, this.num_init_tokens, position_ids[0], this.dataType);
-        }
+            // cache_update(decoder_input, decoder_cached_output, i, this.max_sequence_length, this.num_init_tokens, position_ids[0], this.dataType);
 
+
+            // modify the kv cache in place using scatterND
+            // fill up indices
+            for (let i = 0; i < 8; i++) {
+                const baseIndex = i * 3;
+                this.indices.cpuData[baseIndex] = BigInt(0); // first indice，value always set to 0，as batch size is 1
+                this.indices.cpuData[baseIndex + 1] = BigInt(i); // second indice，scope [0, 7]
+                this.indices.cpuData[baseIndex + 2] = BigInt(position_ids[0] - 1); // third indice，depends on position
+            }
+
+            for (let i = 0; i < 6; i++) {
+                const key_feeds = {
+                    'data': decoder_input[`past_key_values.${i}.decoder.key`],
+                    'indices': this.indices,
+                    'updates': decoder_cached_output[`present_key_values.${i}.decoder.key`],
+                }
+                const value_feeds = {
+                    'data': decoder_input[`past_key_values.${i}.decoder.value`],
+                    'indices': this.indices,
+                    'updates': decoder_cached_output[`present_key_values.${i}.decoder.value`],
+                }
+                const key_results = await this.scatternd_session.run(key_feeds);
+                const value_results = await this.scatternd_session.run(value_feeds);
+                decoder_input[`past_key_values.${i}.decoder.key`] = key_results.output;
+                decoder_input[`past_key_values.${i}.decoder.value`] = value_results.output;
+            }
+        }
         // add token to sentence decode time
         const sentence = await this.tokenizer.decode(tokens, { skip_special_tokens: true });
         console.log(`  post-processing time: ${(performance.now() - start).toFixed(2)} ms`);
