@@ -30,6 +30,10 @@
             background-color: white;
             font-size: 18px;
         }
+
+        .form-group {
+            margin-top: 1rem;
+        }
     </style>
 </head>
 
@@ -41,23 +45,23 @@
         <div class="d-grid gap-3">
             <div class="row">
                 <div class="col-md-4 rounded-block">
-                    <h4>Audio Input</h4>
+                    <h4>Audio Options</h4>
                     <form>
-                        <div class="form-group ">
+                        <div class="form-group">
                             <input type="file" id="file-upload" class="form-control-file">
                         </div>
-                        <br />
-                        <p>OR</p>
-                        <button id="record" class="btn btn-primary" type="button">Record</button>
-                        <br />
-                        <p>OR</p>
-                        <button id="speech" class="btn btn-primary" type="button">Start Speech</button>
+                        <div class="form-group">
+                            <button id="record" class="btn btn-primary" type="button">Record</button>
+                        </div>
+                        <div class="form-group">
+                            <button id="speech" class="btn btn-primary" type="button">Start Speech</button>
+                        </div>
                     </form>
                 </div>
 
                 <div class="col-md-4 rounded-block">
-                    <h4>Transcribe</h4>
-                    <div id="record_play">
+                    <h4>Audio Source</h4>
+                    <div id="record_play" class="form-group">
                         <audio id="record_play_audio" controls></audio>
                     </div>
                 </div>
