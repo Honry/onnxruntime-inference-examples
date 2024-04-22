@@ -412,3 +412,7 @@ async function processAudioBuffer() {
         lastSpeechCompleted = true;
     }
 }
+
+export function isLastSpeechCompleted() {
+    return lastSpeechCompleted;
+}
