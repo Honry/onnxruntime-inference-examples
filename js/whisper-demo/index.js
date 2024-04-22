@@ -191,8 +191,8 @@ async function transcribe_file() {
     try {
         const buffer = await (await fetch(audio_src.src)).arrayBuffer();
         const audioBuffer = await getAudioContext().decodeAudioData(buffer);
-        var offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
-        var source = offlineContext.createBufferSource();
+        const offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
+        const source = offlineContext.createBufferSource();
         source.buffer = audioBuffer;
         source.connect(offlineContext.destination);
         source.start();

@@ -1,5 +1,5 @@
 function loadScript(scriptName) {
-  var s = document.createElement('script');
+  const s = document.createElement('script');
   s.src = chrome.runtime.getURL(scriptName);
   const extensionId = chrome.runtime.id;
   s.dataset.params = JSON.stringify({extensionId});
