@@ -21,7 +21,7 @@ let deviceType = 'gpu';
 let dataType = 'float16';
 
 // audio context
-var context = null;
+let context = null;
 let stream;
 
 export function getAudioContext() {
@@ -411,4 +411,8 @@ async function processAudioBuffer() {
     } else {
         lastSpeechCompleted = true;
     }
+}
+
+export function isLastSpeechCompleted() {
+    return lastSpeechCompleted;
 }

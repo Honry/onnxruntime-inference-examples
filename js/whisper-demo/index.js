@@ -1,13 +1,13 @@
 import { AutoProcessor, AutoTokenizer } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.1';
 
-import { initWhisper, process_audio, startSpeech, stopSpeech, getAudioContext } from './main.js';
+import { initWhisper, process_audio, startSpeech, stopSpeech, getAudioContext, isLastSpeechCompleted } from './main.js';
 
 import { log } from './utils.js';
 
 // some dom shortcuts
+let file_upload;
 let record;
 let speech;
-let transcribe;
 let progress;
 let audio_src;
 let textarea;
@@ -57,7 +57,9 @@ function updateConfig() {
 
 // transcribe active
 function busy() {
-    transcribe.disabled = true;
+    file_upload.disabled = true;
+    record.disabled = true;
+    speech.disabled = true;
     progress.parentNode.style.display = "block";
     document.getElementById("outputText").value = "";
     document.getElementById('latency').innerText = "";
@@ -65,8 +67,9 @@ function busy() {
 
 // transcribe done
 function ready() {
+    file_upload.disabled = false;
+    record.disabled = false;
     speech.disabled = false;
-    transcribe.disabled = false;
     progress.style.width = "0%";
     progress.parentNode.style.display = "none";
     log('whisper ready');
@@ -98,21 +101,24 @@ const recognitionClient = {
 // called when document is loaded
 document.addEventListener("DOMContentLoaded", async () => {
     audio_src = document.querySelector('audio');
+    file_upload = document.getElementById('file-upload');
     record = document.getElementById('record');
     speech = document.getElementById('speech');
-    transcribe = document.getElementById('transcribe');
     progress = document.getElementById('progress');
     textarea = document.getElementById('outputText');
-    transcribe.disabled = true;
     speech.disabled = true;
+    record.disabled = true;
+    file_upload.disabled = true;
     progress.parentNode.style.display = "none";
     updateConfig();
 
     // click on Record
-    record.addEventListener("click", (e) => {
+    record.addEventListener("click", async (e) => {
         if (e.currentTarget.innerText == "Record") {
             e.currentTarget.innerText = "Stop Recording";
             startRecord();
+            file_upload.disabled = true;
+            speech.disabled = true;
         }
         else {
             e.currentTarget.innerText = "Record";
@@ -123,6 +129,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // click on Speech
     speech.addEventListener("click", async (e) => {
         if (e.currentTarget.innerText == "Start Speech") {
+            file_upload.disabled = true;
+            record.disabled = true;
+            log(`Processing speech audio...`);
             // If audio has a source, do speech recognition from it otherwise from a mic.
             if (await startSpeech(recognitionClient, audio_src.readyState ? audio_src : undefined)) {
                 speech.innerText = "Stop Speech";
@@ -133,23 +142,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         else {
             e.currentTarget.innerText = "Start Speech";
+            speech.disabled = true;
             await stopSpeech();
+            if (!isLastSpeechCompleted()) {
+                log(`Processing remaining speech audio...`);
+                // set timeout to wait for the last speech-to-text to complete
+                let intervalId = setInterval(() => {
+                    if (isLastSpeechCompleted()) {
+                        file_upload.disabled = false;
+                        record.disabled = false;
+                        clearInterval(intervalId);
+                        speech.disabled = false;
+                        log('Speech-to-Text completed');
+                    }
+                }, 1000);
+            } else {
+                speech.disabled = false;
+            }
         }
     });
 
-    // click on Transcribe
-    transcribe.addEventListener("click", () => {
-        transcribe_file();
-    });
-
     // drop file
-    document.getElementById("file-upload").onchange = function (evt) {
+    file_upload.onchange = async (evt) => {
         let target = evt.target || window.event.src, files = target.files;
         if (files.length > 0) {
             audio_src.src = URL.createObjectURL(files[0]);
         } else {
             audio_src.src = '';
         }
+    }
+
+    // transcribe audio source
+    audio_src.onloadeddata = async () => {
+        await transcribe_file();
     }
 
     if (await initWhisper(ort, AutoProcessor, AutoTokenizer, options)) {
@@ -169,8 +194,8 @@ async function transcribe_file() {
     try {
         const buffer = await (await fetch(audio_src.src)).arrayBuffer();
         const audioBuffer = await getAudioContext().decodeAudioData(buffer);
-        var offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
-        var source = offlineContext.createBufferSource();
+        const offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
+        const source = offlineContext.createBufferSource();
         source.buffer = audioBuffer;
         source.connect(offlineContext.destination);
         source.start();
