@@ -131,6 +131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (e.currentTarget.innerText == "Start Speech") {
             file_upload.disabled = true;
             record.disabled = true;
+            log(`Processing speech audio...`);
             // If audio has a source, do speech recognition from it otherwise from a mic.
             if (await startSpeech(recognitionClient, audio_src.readyState ? audio_src : undefined)) {
                 speech.innerText = "Stop Speech";
@@ -141,9 +142,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         else {
             e.currentTarget.innerText = "Start Speech";
-            await stopSpeech();
             speech.disabled = true;
+            await stopSpeech();
             if (!isLastSpeechCompleted()) {
+                log(`Processing remaining speech audio...`);
                 // set timeout to wait for the last speech-to-text to complete
                 let intervalId = setInterval(() => {
                     if (isLastSpeechCompleted()) {
@@ -151,6 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         record.disabled = false;
                         clearInterval(intervalId);
                         speech.disabled = false;
+                        log('Speech-to-Text completed');
                     }
                 }, 1000);
             } else {
