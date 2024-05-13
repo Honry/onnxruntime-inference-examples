@@ -16,7 +16,7 @@ function getConfig() {
         provider: "webnn",
         device: "gpu",
         threads: "1",
-        images: "2",
+        images: "1",
     };
     let vars = query.split("&");
     for (var i = 0; i < vars.length; i++) {
@@ -134,7 +134,11 @@ const models = {
         // opt: { freeDimensionOverrides: { batch_size: 1, num_channels_latent: 4, height_latent: 64, width_latent: 64 } }
         opt: { freeDimensionOverrides: { batch: 1, channels: 4, height: 64, width: 64 } }
 
-    }
+    },
+    "safety_checker": {
+        url: "safety_checker/model.onnx", size: 100,
+        opt: { freeDimensionOverrides: { batch: 1, channels: 3, height: 224, width: 224 } }
+    },
 }
 
 // ort.env.wasm.wasmPaths = 'dist/';
@@ -241,7 +245,7 @@ function draw_image(t, image_nr) {
         if (x > 1.) x = 1.;
         pix[i] = x;
     }
-    const imageData = t.toImageData({ tensorLayout: 'NCWH', format: 'RGB' });
+    const imageData = t.toImageData({ tensorLayout: 'NCHW', format: 'RGB' });
     const canvas = document.getElementById(`img_canvas_${image_nr}`);
     canvas.width = imageData.width;
     canvas.height = imageData.height;
@@ -249,6 +253,83 @@ function draw_image(t, image_nr) {
     const div = document.getElementById(`img_div_${image_nr}`);
     div.style.opacity = 1.
 }
+
+function draw_out_image(t) {
+    const imageData = t.toImageData({ tensorLayout: 'NHWC', format: 'RGB' });
+    const canvas = document.getElementById(`img_canvas_safety`);
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    canvas.getContext('2d').putImageData(imageData, 0, 0);
+    const div = document.getElementById(`safety_img`);
+    div.style.opacity = 1.
+}
+
+function resize_image(image_nr, targetWidth, targetHeight) {
+    // let canvas = document.createElement('canvas');
+    // Use img_canvas_test to ensure the input
+    const canvas = document.getElementById(`img_canvas_test`);
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    let ctx = canvas.getContext('2d');
+    let canvas_source = document.getElementById(`img_canvas_${image_nr}`);
+    ctx.drawImage(canvas_source, 0, 0, canvas_source.width, canvas_source.height, 0, 0, targetWidth, targetHeight);
+    const div = document.getElementById(`test_img`);
+    div.style.opacity = 1.
+    let imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+
+    return imageData;
+}
+
+function normalizeImageData(imageData) {
+    const mean = [0.48145466, 0.4578275, 0.40821073];
+    const std = [0.26862954, 0.26130258, 0.27577711];
+    const { data, width, height } = imageData;
+    const numPixels = width * height;
+
+    for (let i = 0; i < numPixels; i++) {
+        const offset = i * 4;
+        for (let c = 0; c < 3; c++) {
+            const normalizedValue = ((data[offset + c] / 255) - mean[c]) / std[c];
+            data[offset + c] = Math.round(normalizedValue * 255);
+        }
+    }
+
+    return imageData;
+}
+
+function get_tensor_from_image(imageData, format) {
+    const { data, width, height } = imageData;
+    const numPixels = width * height;
+    const channels = 3; 
+    const rearrangedData = new Float32Array(numPixels * channels);
+    let destOffset = 0;
+  
+    for (let i = 0; i < numPixels; i++) {
+      const srcOffset = i * 4;
+      const r = data[srcOffset] / 255;
+      const g = data[srcOffset + 1] / 255;
+      const b = data[srcOffset + 2] / 255;
+  
+      if (format === 'NCHW') {
+        rearrangedData[destOffset] = r;
+        rearrangedData[destOffset + numPixels] = g;
+        rearrangedData[destOffset + 2 * numPixels] = b;
+        destOffset++;
+      } else if (format === 'NHWC') {
+        rearrangedData[destOffset] = r;
+        rearrangedData[destOffset + 1] = g;
+        rearrangedData[destOffset + 2] = b;
+        destOffset += channels;
+      } else {
+        throw new Error('Invalid format specified.');
+      }
+    }
+  
+    const tensorShape = format === 'NCHW' ? [1, channels, height, width] : [1, height, width, channels];
+    let tensor = new ort.Tensor("float16", convertToUint16Array(rearrangedData), tensorShape);
+  
+    return tensor;
+  }
 
 async function generate_image() {
     try {
@@ -298,6 +379,23 @@ async function generate_image() {
             const { sample } = await models.vae_decoder.sess.run({ "latent_sample": new_latents });
             perf_info.push(`vae_decoder: ${(performance.now() - start).toFixed(1)}ms`);
             draw_image(sample, j);
+
+            // safety_checker
+            let resized_image_data = resize_image(j, 224, 224);
+            let normalized_image_data = normalizeImageData(resized_image_data);
+            let safety_checker_feed = {
+                "clip_input": get_tensor_from_image(normalized_image_data, "NCHW"),
+                "images": get_tensor_from_image(resized_image_data, "NHWC"),
+            };
+            start = performance.now();
+            const { out_images, has_nsfw_concepts } = await models.safety_checker.sess.run(safety_checker_feed);
+            perf_info.push(`safety_checker: ${(performance.now() - start).toFixed(1)}ms`);
+
+            log("### has_nsfw_concepts ###: " + has_nsfw_concepts.data[0]);
+
+            let out_image = new ort.Tensor("float32", convertToFloat32Array(out_images.data), out_images.dims);
+            draw_out_image(out_image);
+
             log(perf_info.join(", "))
             perf_info = [];
         }
