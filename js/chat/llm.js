@@ -68,7 +68,7 @@ export class LLM {
         const provider = options.provider;
         const verbose = options.verbose;
         const model_path = location.href.includes('github.io') ?
-            'https://huggingface.co/lwanming/Phi3-mini-4k-instruct-static/blob/main/'
+            'https://huggingface.co/lwanming/Phi3-mini-4k-instruct-static/resolve/main/'
             : 'models/';
 
         const type_suffix = this.dtype == 'float16' ? '_fp16' : '';// '_op_simplifiedlayernorm_fp16' : '';
