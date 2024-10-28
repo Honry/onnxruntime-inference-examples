@@ -179,7 +179,8 @@ function getConfig() {
     threads: 1,
     show_special: 0,
     csv: 0,
-    max_tokens: 128,
+    max_seq: 128,
+    max_cache: 256,
     local: 0,
   }
   let vars = query.split('&');
@@ -213,7 +214,7 @@ env.allowLocalModels = config.local == 1;
 
 let tokenizer;
 
-const llm = new LLM(128, 256, config.dtype);
+const llm = new LLM(config.max_seq, config.max_cache, config.dtype);
 
 function token_to_text(tokenizer, tokens) {
   const txt = tokenizer.decode(tokens, { skip_special_tokens: config.show_special != 1, });
@@ -249,7 +250,7 @@ async function Query(continuation, query, cb) {
 }
 
 // Load the model and tokenizer
-async function Init(hasFP16) {
+async function Init() {
   try {
     const model_id = 'microsoft/Phi-3-mini-4k-instruct';
     tokenizer = await AutoTokenizer.from_pretrained(model_id);
@@ -259,8 +260,7 @@ async function Init(hasFP16) {
       profiler: config.profiler,
       verbose: config.verbose,
       local: config.local,
-      max_tokens: config.max_tokens,
-      hasFP16: hasFP16,
+      max_seq: config.max_seq,
     });
     log('Ready.');
   } catch (error) {
@@ -269,8 +269,7 @@ async function Init(hasFP16) {
 }
 
 window.onload = () => {
-  const supported = 0;
-  Init(supported === 0).then(() => {
+  Init().then(() => {
     sendButton.addEventListener('click', submitRequest);
     const userInput = document.getElementById('user-input');
     document.getElementById('status').style.display = 'none';

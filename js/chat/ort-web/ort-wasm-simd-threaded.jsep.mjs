@@ -689,7 +689,7 @@ function createWasm() {
 }
 
 var ASM_CONSTS = {
- 826740: ($0, $1, $2, $3, $4) => {
+ 826820: ($0, $1, $2, $3, $4) => {
   if (typeof Module == "undefined" || !Module.MountedFiles) {
    return 1;
   }
@@ -727,264 +727,264 @@ var ASM_CONSTS = {
    return 4;
   }
  },
- 827423: ($0, $1, $2) => {
+ 827503: ($0, $1, $2) => {
   Module.jsepUploadTensor($0, GROWABLE_HEAP_U8().subarray($1 >>> 0, $1 + $2 >>> 0));
  },
- 827486: () => Module.jsepReserveTensorId(),
- 827527: $0 => {
+ 827566: () => Module.jsepReserveTensorId(),
+ 827607: $0 => {
   Module.jsepReleaseTensorId($0);
  },
- 827563: () => {
+ 827643: () => {
   Module.jsepCaptureBegin();
  },
- 827594: () => {
+ 827674: () => {
   Module.jsepCaptureEnd();
  },
- 827623: () => {
+ 827703: () => {
   Module.jsepReplay();
  },
- 827648: $0 => Module.jsepAlloc($0),
- 827681: $0 => Module.jsepFree($0),
- 827713: ($0, $1, $2) => {
+ 827728: $0 => Module.jsepAlloc($0),
+ 827761: $0 => Module.jsepFree($0),
+ 827793: ($0, $1, $2) => {
   Module.jsepCopy($0, $1, $2, true);
  },
- 827752: ($0, $1, $2) => {
+ 827832: ($0, $1, $2) => {
   Module.jsepCopy($0, $1, $2);
  },
- 827785: () => (typeof wasmOffsetConverter !== "undefined"),
- 827842: $0 => {
+ 827865: () => (typeof wasmOffsetConverter !== "undefined"),
+ 827922: $0 => {
   Module.jsepCreateKernel("Abs", $0, undefined);
  },
- 827893: $0 => {
+ 827973: $0 => {
   Module.jsepCreateKernel("Neg", $0, undefined);
  },
- 827944: $0 => {
+ 828024: $0 => {
   Module.jsepCreateKernel("Floor", $0, undefined);
  },
- 827997: $0 => {
+ 828077: $0 => {
   Module.jsepCreateKernel("Ceil", $0, undefined);
  },
- 828049: $0 => {
+ 828129: $0 => {
   Module.jsepCreateKernel("Reciprocal", $0, undefined);
  },
- 828107: $0 => {
+ 828187: $0 => {
   Module.jsepCreateKernel("Sqrt", $0, undefined);
  },
- 828159: $0 => {
+ 828239: $0 => {
   Module.jsepCreateKernel("Exp", $0, undefined);
  },
- 828210: $0 => {
+ 828290: $0 => {
   Module.jsepCreateKernel("Erf", $0, undefined);
  },
- 828261: $0 => {
+ 828341: $0 => {
   Module.jsepCreateKernel("Sigmoid", $0, undefined);
  },
- 828316: ($0, $1, $2) => {
+ 828396: ($0, $1, $2) => {
   Module.jsepCreateKernel("HardSigmoid", $0, ({
    "alpha": $1,
    "beta": $2
   }));
  },
- 828395: $0 => {
+ 828475: $0 => {
   Module.jsepCreateKernel("Log", $0, undefined);
  },
- 828446: $0 => {
+ 828526: $0 => {
   Module.jsepCreateKernel("Sin", $0, undefined);
  },
- 828497: $0 => {
+ 828577: $0 => {
   Module.jsepCreateKernel("Cos", $0, undefined);
  },
- 828548: $0 => {
+ 828628: $0 => {
   Module.jsepCreateKernel("Tan", $0, undefined);
  },
- 828599: $0 => {
+ 828679: $0 => {
   Module.jsepCreateKernel("Asin", $0, undefined);
  },
- 828651: $0 => {
+ 828731: $0 => {
   Module.jsepCreateKernel("Acos", $0, undefined);
  },
- 828703: $0 => {
+ 828783: $0 => {
   Module.jsepCreateKernel("Atan", $0, undefined);
  },
- 828755: $0 => {
+ 828835: $0 => {
   Module.jsepCreateKernel("Sinh", $0, undefined);
  },
- 828807: $0 => {
+ 828887: $0 => {
   Module.jsepCreateKernel("Cosh", $0, undefined);
  },
- 828859: $0 => {
+ 828939: $0 => {
   Module.jsepCreateKernel("Asinh", $0, undefined);
  },
- 828912: $0 => {
+ 828992: $0 => {
   Module.jsepCreateKernel("Acosh", $0, undefined);
  },
- 828965: $0 => {
+ 829045: $0 => {
   Module.jsepCreateKernel("Atanh", $0, undefined);
  },
- 829018: $0 => {
+ 829098: $0 => {
   Module.jsepCreateKernel("Tanh", $0, undefined);
  },
- 829070: $0 => {
+ 829150: $0 => {
   Module.jsepCreateKernel("Not", $0, undefined);
  },
- 829121: ($0, $1, $2) => {
+ 829201: ($0, $1, $2) => {
   Module.jsepCreateKernel("Clip", $0, ({
    "min": $1,
    "max": $2
   }));
  },
- 829190: $0 => {
+ 829270: $0 => {
   Module.jsepCreateKernel("Clip", $0, undefined);
  },
- 829242: ($0, $1) => {
+ 829322: ($0, $1) => {
   Module.jsepCreateKernel("Elu", $0, ({
    "alpha": $1
   }));
  },
- 829300: $0 => {
+ 829380: $0 => {
   Module.jsepCreateKernel("Gelu", $0, undefined);
  },
- 829352: $0 => {
+ 829432: $0 => {
   Module.jsepCreateKernel("Relu", $0, undefined);
  },
- 829404: ($0, $1) => {
+ 829484: ($0, $1) => {
   Module.jsepCreateKernel("LeakyRelu", $0, ({
    "alpha": $1
   }));
  },
- 829468: ($0, $1) => {
+ 829548: ($0, $1) => {
   Module.jsepCreateKernel("ThresholdedRelu", $0, ({
    "alpha": $1
   }));
  },
- 829538: ($0, $1) => {
+ 829618: ($0, $1) => {
   Module.jsepCreateKernel("Cast", $0, ({
    "to": $1
   }));
  },
- 829596: $0 => {
+ 829676: $0 => {
   Module.jsepCreateKernel("Add", $0, undefined);
  },
- 829647: $0 => {
+ 829727: $0 => {
   Module.jsepCreateKernel("Sub", $0, undefined);
  },
- 829698: $0 => {
+ 829778: $0 => {
   Module.jsepCreateKernel("Mul", $0, undefined);
  },
- 829749: $0 => {
+ 829829: $0 => {
   Module.jsepCreateKernel("Div", $0, undefined);
  },
- 829800: $0 => {
+ 829880: $0 => {
   Module.jsepCreateKernel("Pow", $0, undefined);
  },
- 829851: $0 => {
+ 829931: $0 => {
   Module.jsepCreateKernel("Equal", $0, undefined);
  },
- 829904: $0 => {
+ 829984: $0 => {
   Module.jsepCreateKernel("Greater", $0, undefined);
  },
- 829959: $0 => {
+ 830039: $0 => {
   Module.jsepCreateKernel("GreaterOrEqual", $0, undefined);
  },
- 830021: $0 => {
+ 830101: $0 => {
   Module.jsepCreateKernel("Less", $0, undefined);
  },
- 830073: $0 => {
+ 830153: $0 => {
   Module.jsepCreateKernel("LessOrEqual", $0, undefined);
  },
- 830132: ($0, $1, $2, $3, $4) => {
+ 830212: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceMean", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 830291: ($0, $1, $2, $3, $4) => {
+ 830371: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceMax", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 830449: ($0, $1, $2, $3, $4) => {
+ 830529: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceMin", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 830607: ($0, $1, $2, $3, $4) => {
+ 830687: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceProd", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 830766: ($0, $1, $2, $3, $4) => {
+ 830846: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceSum", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 830924: ($0, $1, $2, $3, $4) => {
+ 831004: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceL1", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 831081: ($0, $1, $2, $3, $4) => {
+ 831161: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceL2", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 831238: ($0, $1, $2, $3, $4) => {
+ 831318: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceLogSum", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 831399: ($0, $1, $2, $3, $4) => {
+ 831479: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceSumSquare", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 831563: ($0, $1, $2, $3, $4) => {
+ 831643: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("ReduceLogSumExp", $0, ({
    "keepDims": !!$1,
    "noopWithEmptyAxes": !!$2,
    "axes": $3 ? (Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0))) : []
   }));
  },
- 831727: $0 => {
+ 831807: $0 => {
   Module.jsepCreateKernel("Where", $0, undefined);
  },
- 831780: ($0, $1, $2) => {
+ 831860: ($0, $1, $2) => {
   Module.jsepCreateKernel("Transpose", $0, ({
    "perm": $1 ? Array.from(GROWABLE_HEAP_I32().subarray($1 >>> 0, $2 >>> 0)) : []
   }));
  },
- 831888: ($0, $1, $2, $3) => {
+ 831968: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("DepthToSpace", $0, ({
    "blocksize": $1,
    "mode": UTF8ToString($2),
    "format": $3 ? "NHWC" : "NCHW"
   }));
  },
- 832021: ($0, $1, $2, $3) => {
+ 832101: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("DepthToSpace", $0, ({
    "blocksize": $1,
    "mode": UTF8ToString($2),
    "format": $3 ? "NHWC" : "NCHW"
   }));
  },
- 832154: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) => {
+ 832234: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) => {
   Module.jsepCreateKernel("ConvTranspose", $0, ({
    "format": $8 ? "NHWC" : "NCHW",
    "autoPad": $1,
@@ -999,7 +999,7 @@ var ASM_CONSTS = {
    "activation": UTF8ToString($14)
   }));
  },
- 832555: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
+ 832635: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
   Module.jsepCreateKernel("ConvTranspose", $0, ({
    "format": $7 ? "NHWC" : "NCHW",
    "autoPad": $1,
@@ -1014,7 +1014,7 @@ var ASM_CONSTS = {
    "activation": UTF8ToString($13)
   }));
  },
- 833120: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) => {
+ 833200: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) => {
   Module.jsepCreateKernel("ConvTranspose", $0, ({
    "format": $8 ? "NHWC" : "NCHW",
    "autoPad": $1,
@@ -1029,7 +1029,7 @@ var ASM_CONSTS = {
    "activation": UTF8ToString($14)
   }));
  },
- 833521: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
+ 833601: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
   Module.jsepCreateKernel("ConvTranspose", $0, ({
    "format": $7 ? "NHWC" : "NCHW",
    "autoPad": $1,
@@ -1044,12 +1044,12 @@ var ASM_CONSTS = {
    "activation": UTF8ToString($13)
   }));
  },
- 834086: ($0, $1) => {
+ 834166: ($0, $1) => {
   Module.jsepCreateKernel("GlobalAveragePool", $0, ({
    "format": $1 ? "NHWC" : "NCHW"
   }));
  },
- 834177: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
+ 834257: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
   Module.jsepCreateKernel("AveragePool", $0, ({
    "format": $13 ? "NHWC" : "NCHW",
    "auto_pad": $1,
@@ -1062,12 +1062,12 @@ var ASM_CONSTS = {
    "strides": $11 ? Array.from(GROWABLE_HEAP_I32().subarray($11 >>> 0, $12 >>> 0)) : []
   }));
  },
- 834592: ($0, $1) => {
+ 834672: ($0, $1) => {
   Module.jsepCreateKernel("GlobalAveragePool", $0, ({
    "format": $1 ? "NHWC" : "NCHW"
   }));
  },
- 834683: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
+ 834763: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
   Module.jsepCreateKernel("AveragePool", $0, ({
    "format": $13 ? "NHWC" : "NCHW",
    "auto_pad": $1,
@@ -1080,12 +1080,12 @@ var ASM_CONSTS = {
    "strides": $11 ? Array.from(GROWABLE_HEAP_I32().subarray($11 >>> 0, $12 >>> 0)) : []
   }));
  },
- 835098: ($0, $1) => {
+ 835178: ($0, $1) => {
   Module.jsepCreateKernel("GlobalMaxPool", $0, ({
    "format": $1 ? "NHWC" : "NCHW"
   }));
  },
- 835185: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
+ 835265: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
   Module.jsepCreateKernel("MaxPool", $0, ({
    "format": $13 ? "NHWC" : "NCHW",
    "auto_pad": $1,
@@ -1098,12 +1098,12 @@ var ASM_CONSTS = {
    "strides": $11 ? Array.from(GROWABLE_HEAP_I32().subarray($11 >>> 0, $12 >>> 0)) : []
   }));
  },
- 835596: ($0, $1) => {
+ 835676: ($0, $1) => {
   Module.jsepCreateKernel("GlobalMaxPool", $0, ({
    "format": $1 ? "NHWC" : "NCHW"
   }));
  },
- 835683: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
+ 835763: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) => {
   Module.jsepCreateKernel("MaxPool", $0, ({
    "format": $13 ? "NHWC" : "NCHW",
    "auto_pad": $1,
@@ -1116,7 +1116,7 @@ var ASM_CONSTS = {
    "strides": $11 ? Array.from(GROWABLE_HEAP_I32().subarray($11 >>> 0, $12 >>> 0)) : []
   }));
  },
- 836094: ($0, $1, $2, $3, $4) => {
+ 836174: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("Gemm", $0, ({
    "alpha": $1,
    "beta": $2,
@@ -1124,54 +1124,54 @@ var ASM_CONSTS = {
    "transB": $4
   }));
  },
- 836198: $0 => {
+ 836278: $0 => {
   Module.jsepCreateKernel("MatMul", $0, undefined);
  },
- 836252: ($0, $1, $2, $3) => {
+ 836332: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("ArgMax", $0, ({
    "keepDims": !!$1,
    "selectLastIndex": !!$2,
    "axis": $3
   }));
  },
- 836360: ($0, $1, $2, $3) => {
+ 836440: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("ArgMin", $0, ({
    "keepDims": !!$1,
    "selectLastIndex": !!$2,
    "axis": $3
   }));
  },
- 836468: ($0, $1) => {
+ 836548: ($0, $1) => {
   Module.jsepCreateKernel("Softmax", $0, ({
    "axis": $1
   }));
  },
- 836531: ($0, $1) => {
+ 836611: ($0, $1) => {
   Module.jsepCreateKernel("Concat", $0, ({
    "axis": $1
   }));
  },
- 836591: ($0, $1, $2, $3, $4) => {
+ 836671: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("Split", $0, ({
    "axis": $1,
    "numOutputs": $2,
    "splitSizes": $3 ? Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0)) : []
   }));
  },
- 836731: $0 => {
+ 836811: $0 => {
   Module.jsepCreateKernel("Expand", $0, undefined);
  },
- 836785: ($0, $1) => {
+ 836865: ($0, $1) => {
   Module.jsepCreateKernel("Gather", $0, ({
    "axis": Number($1)
   }));
  },
- 836856: ($0, $1) => {
+ 836936: ($0, $1) => {
   Module.jsepCreateKernel("GatherElements", $0, ({
    "axis": Number($1)
   }));
  },
- 836935: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) => {
+ 837015: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) => {
   Module.jsepCreateKernel("Resize", $0, ({
    "antialias": $1,
    "axes": $2 ? Array.from(GROWABLE_HEAP_I32().subarray($2 >>> 0, $3 >>> 0)) : [],
@@ -1184,44 +1184,44 @@ var ASM_CONSTS = {
    "nearestMode": UTF8ToString($10)
   }));
  },
- 837281: ($0, $1, $2, $3, $4, $5, $6) => {
+ 837361: ($0, $1, $2, $3, $4, $5, $6) => {
   Module.jsepCreateKernel("Slice", $0, ({
    "starts": $1 ? Array.from(GROWABLE_HEAP_I32().subarray($1 >>> 0, $2 >>> 0)) : [],
    "ends": $3 ? Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0)) : [],
    "axes": $5 ? Array.from(GROWABLE_HEAP_I32().subarray($5 >>> 0, $6 >>> 0)) : []
   }));
  },
- 837497: $0 => {
+ 837577: $0 => {
   Module.jsepCreateKernel("Tile", $0, undefined);
  },
- 837549: ($0, $1, $2) => {
+ 837629: ($0, $1, $2) => {
   Module.jsepCreateKernel("InstanceNormalization", $0, ({
    "epsilon": $1,
    "format": $2 ? "NHWC" : "NCHW"
   }));
  },
- 837663: ($0, $1, $2) => {
+ 837743: ($0, $1, $2) => {
   Module.jsepCreateKernel("InstanceNormalization", $0, ({
    "epsilon": $1,
    "format": $2 ? "NHWC" : "NCHW"
   }));
  },
- 837777: $0 => {
+ 837857: $0 => {
   Module.jsepCreateKernel("Range", $0, undefined);
  },
- 837830: ($0, $1) => {
+ 837910: ($0, $1) => {
   Module.jsepCreateKernel("Einsum", $0, ({
    "equation": UTF8ToString($1)
   }));
  },
- 837911: ($0, $1, $2, $3, $4) => {
+ 837991: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("Pad", $0, ({
    "mode": $1,
    "value": $2,
    "pads": $3 ? Array.from(GROWABLE_HEAP_I32().subarray($3 >>> 0, $4 >>> 0)) : []
   }));
  },
- 838038: ($0, $1, $2, $3, $4, $5) => {
+ 838118: ($0, $1, $2, $3, $4, $5) => {
   Module.jsepCreateKernel("BatchNormalization", $0, ({
    "epsilon": $1,
    "momentum": $2,
@@ -1230,7 +1230,7 @@ var ASM_CONSTS = {
    "format": $5 ? "NHWC" : "NCHW"
   }));
  },
- 838207: ($0, $1, $2, $3, $4, $5) => {
+ 838287: ($0, $1, $2, $3, $4, $5) => {
   Module.jsepCreateKernel("BatchNormalization", $0, ({
    "epsilon": $1,
    "momentum": $2,
@@ -1239,19 +1239,19 @@ var ASM_CONSTS = {
    "format": $5 ? "NHWC" : "NCHW"
   }));
  },
- 838376: ($0, $1, $2) => {
+ 838456: ($0, $1, $2) => {
   Module.jsepCreateKernel("CumSum", $0, ({
    "exclusive": Number($1),
    "reverse": Number($2)
   }));
  },
- 838473: ($0, $1, $2) => {
+ 838553: ($0, $1, $2) => {
   Module.jsepCreateKernel("DequantizeLinear", $0, ({
    "axis": $1,
    "blockSize": $2
   }));
  },
- 838563: ($0, $1, $2, $3, $4, $5, $6, $7, $8) => {
+ 838643: ($0, $1, $2, $3, $4, $5, $6, $7, $8) => {
   Module.jsepCreateKernel("Attention", $0, ({
    "numHeads": $1,
    "isUnidirectional": $2,
@@ -1262,16 +1262,16 @@ var ASM_CONSTS = {
    "pastPresentShareBuffer": !!$8
   }));
  },
- 838835: $0 => {
+ 838915: $0 => {
   Module.jsepCreateKernel("BiasAdd", $0, undefined);
  },
- 838890: $0 => {
+ 838970: $0 => {
   Module.jsepCreateKernel("BiasSplitGelu", $0, undefined);
  },
- 838951: $0 => {
+ 839031: $0 => {
   Module.jsepCreateKernel("FastGelu", $0, undefined);
  },
- 839007: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) => {
+ 839087: ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) => {
   Module.jsepCreateKernel("Conv", $0, ({
    "format": $11 ? "NHWC" : "NCHW",
    "auto_pad": $1,
@@ -1285,31 +1285,31 @@ var ASM_CONSTS = {
    "activation_params": $14 ? Array.from(GROWABLE_HEAP_F32().subarray($14 >>> 0, $15 >>> 0)) : []
   }));
  },
- 839503: $0 => {
+ 839583: $0 => {
   Module.jsepCreateKernel("Gelu", $0, undefined);
  },
- 839555: ($0, $1, $2, $3) => {
+ 839635: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("GroupQueryAttention", $0, ({
    "numHeads": $1,
    "kvNumHeads": $2,
    "scale": $3
   }));
  },
- 839668: ($0, $1, $2, $3) => {
+ 839748: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("LayerNormalization", $0, ({
    "axis": $1,
    "epsilon": $2,
    "simplified": !!$3
   }));
  },
- 839779: ($0, $1, $2, $3) => {
+ 839859: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("LayerNormalization", $0, ({
    "axis": $1,
    "epsilon": $2,
    "simplified": !!$3
   }));
  },
- 839890: ($0, $1, $2, $3, $4, $5) => {
+ 839970: ($0, $1, $2, $3, $4, $5) => {
   Module.jsepCreateKernel("MatMulNBits", $0, ({
    "k": $1,
    "n": $2,
@@ -1318,7 +1318,7 @@ var ASM_CONSTS = {
    "blockSize": $5
   }));
  },
- 840017: ($0, $1, $2, $3, $4, $5) => {
+ 840097: ($0, $1, $2, $3, $4, $5) => {
   Module.jsepCreateKernel("MultiHeadAttention", $0, ({
    "numHeads": $1,
    "isUnidirectional": $2,
@@ -1327,12 +1327,12 @@ var ASM_CONSTS = {
    "doRotary": $5
   }));
  },
- 840176: ($0, $1) => {
+ 840256: ($0, $1) => {
   Module.jsepCreateKernel("QuickGelu", $0, ({
    "alpha": $1
   }));
  },
- 840240: ($0, $1, $2, $3, $4) => {
+ 840320: ($0, $1, $2, $3, $4) => {
   Module.jsepCreateKernel("RotaryEmbedding", $0, ({
    "interleaved": !!$1,
    "numHeads": $2,
@@ -1340,29 +1340,29 @@ var ASM_CONSTS = {
    "scale": $4
   }));
  },
- 840379: ($0, $1, $2) => {
+ 840459: ($0, $1, $2) => {
   Module.jsepCreateKernel("SkipLayerNormalization", $0, ({
    "epsilon": $1,
    "simplified": !!$2
   }));
  },
- 840481: ($0, $1, $2) => {
+ 840561: ($0, $1, $2) => {
   Module.jsepCreateKernel("SkipLayerNormalization", $0, ({
    "epsilon": $1,
    "simplified": !!$2
   }));
  },
- 840583: ($0, $1, $2, $3) => {
+ 840663: ($0, $1, $2, $3) => {
   Module.jsepCreateKernel("GatherBlockQuantized", $0, ({
    "gatherAxis": $1,
    "quantizeAxis": $2,
    "blockSize": $3
   }));
  },
- 840704: $0 => {
+ 840784: $0 => {
   Module.jsepReleaseKernel($0);
  },
- 840738: ($0, $1) => Module.jsepRunKernel($0, $1, Module.jsepSessionState.sessionHandle, Module.jsepSessionState.errors)
+ 840818: ($0, $1) => Module.jsepRunKernel($0, $1, Module.jsepSessionState.sessionHandle, Module.jsepSessionState.errors)
 };
 
 function __asyncjs__jsepDownload(src_data, dst_data, bytes) {
@@ -3940,9 +3940,9 @@ var _asyncify_start_rewind = a0 => (_asyncify_start_rewind = wasmExports["yb"])(
 
 var _asyncify_stop_rewind = () => (_asyncify_stop_rewind = wasmExports["zb"])();
 
-var ___start_em_js = Module["___start_em_js"] = 840850;
+var ___start_em_js = Module["___start_em_js"] = 840930;
 
-var ___stop_em_js = Module["___stop_em_js"] = 841072;
+var ___stop_em_js = Module["___stop_em_js"] = 841152;
 
 function applySignatureConversions(wasmExports) {
  wasmExports = Object.assign({}, wasmExports);
