@@ -85,7 +85,7 @@ async function submitRequest(e) {
   }
 
   // enter clears the chat history, ctl enter will continue the conversation
-  const continuation = e.ctrlKey && e.key === 'Enter';
+  const continuation = !(e.ctrlKey && e.key === 'Enter');
 
   document.getElementById('chat-container').style.display = 'block';
 
@@ -173,7 +173,7 @@ function getConfig() {
   var config = {
     model: 'phi3',
     provider: 'webnn',
-    dtype: 'float32',
+    dtype: 'float16',
     profiler: 0,
     verbose: 0,
     threads: 1,
@@ -222,31 +222,34 @@ function token_to_text(tokenizer, tokens) {
 }
 
 async function Query(continuation, query, cb) {
-  // continuation = true;
   console.log('continuation: ', continuation);
-  let prompt = `<|system|>\nYou are a friendly assistant.<|end|>\n<|user|>\n${query}<|end|>\n<|assistant|>\n`;
 
+  let prompt = `<|user|>\n${query}<|end|>\n<|assistant|>\n`;
   if (llm.output_tokens.length == 0 || !continuation) {
     // clear kv cache
     await llm.initialize_feed();
+    prompt = `<|system|>\nYou are a friendly assistant.<|end|>\n` + prompt;
   }
 
   console.log('prompt: ', prompt);
   const { input_ids } = await tokenizer(prompt, { return_tensor: false, padding: true, truncation: true });
+  console.log('prompt length: ', input_ids.length);
+  let time_to_first_token;
   const start_timer = performance.now();
   const output_tokens = await llm.generate(input_ids, continuation, (output_tokens) => {
     if (output_tokens.length == 1) {
       // time to first token
-      const took = (performance.now() - start_timer) / 1000;
-      console.log(`time to first token in ${took.toFixed(1)}sec, ${input_ids.length} tokens`);
+      time_to_first_token = (performance.now() - start_timer) / 1000;
     }
     cb(token_to_text(tokenizer, output_tokens));
   });
 
   const took = (performance.now() - start_timer) / 1000;
-  cb(token_to_text(tokenizer, output_tokens));
+  const time_to_new_tokens = took - time_to_first_token;
   const seqlen = output_tokens.length;
-  console.log(`${seqlen} tokens in ${took.toFixed(1)}sec, ${(seqlen / took).toFixed(2)} tokens/sec`);
+  console.log(`${seqlen} tokens in ${took.toFixed(2)} sec,
+  - time to first token: ${time_to_first_token.toFixed(2)} sec,
+  - new tokens per second: ${((seqlen -1) / time_to_new_tokens).toFixed(2)} tokens/sec`);
 }
 
 // Load the model and tokenizer
@@ -268,11 +271,10 @@ async function Init() {
   }
 }
 
-window.onload = () => {
-  Init().then(() => {
-    sendButton.addEventListener('click', submitRequest);
-    const userInput = document.getElementById('user-input');
-    document.getElementById('status').style.display = 'none';
-    userInput.focus();
-  });
+window.onload = async () => {
+  await Init();
+  sendButton.addEventListener('click', submitRequest);
+  const userInput = document.getElementById('user-input');
+  document.getElementById('status').style.display = 'none';
+  userInput.focus();
 }
