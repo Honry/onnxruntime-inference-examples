@@ -26,7 +26,7 @@ marked.use({ mangle: false, headerIds: false });
 
 const sendButton = document.getElementById('send-button');
 const scrollWrapper = document.getElementById('scroll-wrapper');
-
+let cleanKV = false;
 //
 // auto scroll the content area until a user scrolls up
 //
@@ -154,6 +154,7 @@ async function submitRequest(e) {
 document.getElementById('user-input').addEventListener('keydown', function (e) {
   if (e.ctrlKey) {
     if (e.key === 'Enter') {
+      cleanKV = true;
       submitRequest(e);
     } else {
       const query = preCannedQueries[e.key];
@@ -217,7 +218,7 @@ let tokenizer;
 const llm = new LLM(config.max_seq, config.max_cache, config.dtype);
 
 function token_to_text(tokenizer, tokens) {
-  const txt = tokenizer.decode(tokens, { skip_special_tokens: config.show_special != 1, });
+  const txt = tokenizer.decode(tokens, { skip_special_tokens: config.show_special != 1});
   return txt;
 }
 
@@ -225,7 +226,7 @@ async function Query(continuation, query, cb) {
   console.log('continuation: ', continuation);
 
   let prompt = `<|user|>\n${query}<|end|>\n<|assistant|>\n`;
-  if (llm.output_tokens.length == 0 || !continuation) {
+  if (llm.output_tokens.length == 0 || !continuation || cleanKV) {
     // clear kv cache
     await llm.initialize_feed();
     prompt = `<|system|>\nYou are a friendly assistant.<|end|>\n` + prompt;
@@ -236,7 +237,7 @@ async function Query(continuation, query, cb) {
   console.log('prompt length: ', input_ids.length);
   let time_to_first_token;
   const start_timer = performance.now();
-  const output_tokens = await llm.generate(input_ids, continuation, (output_tokens) => {
+  const output_tokens = await llm.generate(input_ids, cleanKV, (output_tokens) => {
     if (output_tokens.length == 1) {
       // time to first token
       time_to_first_token = (performance.now() - start_timer) / 1000;
@@ -244,6 +245,7 @@ async function Query(continuation, query, cb) {
     cb(token_to_text(tokenizer, output_tokens));
   });
 
+  cleanKV = false;
   const took = (performance.now() - start_timer) / 1000;
   const time_to_new_tokens = took - time_to_first_token;
   const seqlen = output_tokens.length;

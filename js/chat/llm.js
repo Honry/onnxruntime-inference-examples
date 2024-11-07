@@ -46,7 +46,7 @@ export class LLM {
     decode_fetches = {};
     decode_tmp_fetches = {};
     output_tokens = [];
-    eos = 32007; // end token
+    eos = [32007, 32000]; // end tokens
     need_position_ids = true;
     stop = false;
     kv_dims = [];
@@ -76,7 +76,7 @@ export class LLM {
             : 'models/';
 
         const type_suffix = this.dtype == 'float16' ? '_fp16' : '';
-        const model_file = `Phi_3_mini_4k_instruct_static_kvcache_uint4_simlayernorm${type_suffix}.onnx`;
+        const model_file = `Phi_3_mini_4k_instruct_static_kvcache_uint4_sink_simlayernorm${type_suffix}.onnx`;
         const model_path = path + model_file;
         const model_bytes = await fetchAndCache(model_path);
         const external_file = model_file + '.data';
@@ -132,6 +132,7 @@ export class LLM {
                 'max_seq_len': this.max_seq,
                 'max_cache_len+max_seq_len': this.attn_mask_len,
                 'max_cache_len': this.max_cache,
+                'sink_len': 2,
             };
         }
 
@@ -144,6 +145,7 @@ export class LLM {
                 'max_seq_len': 1,
                 'max_cache_len+max_seq_len': 1 + this.max_cache,
                 'max_cache_len': this.max_cache,
+                'sink_len': 2,
             };
             log('Create session for decode process...');
             console.log('create session 2 with option: ', { ...session_options });
@@ -181,6 +183,18 @@ export class LLM {
 
         this.feed = {};
         if (this.provider == 'webnn') {
+            const sink_range_tensor = await this.ml_context.createTensor({
+                dataType: 'int32',
+                shape: [2],
+                usage: MLTensorUsage.WRITE,
+                writable: true,
+            });
+            this.ml_context.writeTensor(sink_range_tensor, Int32Array.from([0, 1]));
+            this.feed['sink_range'] = ort.Tensor.fromMLTensor(sink_range_tensor, {
+                dataType: 'int32',
+                dims: [2],
+            });
+
             const kv_desc = { dataType: this.dtype, shape: this.kv_dims };
             const ort_kv_desc = { dataType: this.dtype, dims: this.kv_dims };
             const input_ml_tensor = await this.ml_context.createTensor(kv_desc);
@@ -232,6 +246,7 @@ export class LLM {
                 ort.Tensor.fromMLTensor(this.decode_token_id_tensor, ort_token_id_desc);
         } else if (this.provider == 'webgpu' || this.provider == 'wasm') {
             // key value cache is zero copy, just pass gpu buffer as referece
+            this.feed['sink_range'] = new ort.Tensor('int32', Int32Array.from([0, 1]), [2]);
             const kv_num_elements = product(this.kv_dims);
             const empty = (this.dtype === 'float16') ? new Uint16Array(kv_num_elements) : new Float32Array(kv_num_elements);
             for (let i = 0; i < this.num_layers; ++i) {
@@ -281,10 +296,14 @@ export class LLM {
     }
 
     // prefill prompt and generate tokens, greedy search only
-    async generate(input_ids, continuation, callback) {
+    async generate(input_ids, cleanKV, callback) {
+        if (this.output_tokens.length == 0) {
+            // first question for sink 2
+            input_ids = [1,1].concat(input_ids);
+        }
         console.time('prefill processing');
         this.output_tokens = [];
-        if (!continuation) {
+        if (cleanKV) {
             // clear cache
             this.start_len = 0;
         }
@@ -322,7 +341,7 @@ export class LLM {
             outputs = await this.sess_1.run(this.feed);
             last_token = outputs['token_id'].cpuData[0];
         }
-
+        console.log('first token: ', last_token);
         this.start_len += input_ids_len;
         this.output_tokens.push(last_token);
         if (callback) {
@@ -332,9 +351,8 @@ export class LLM {
 
         this.update_kv_cache(outputs);
         console.timeEnd('prefill processing');
-        while (last_token != this.eos && !this.stop) {
+        while (this.eos.indexOf(last_token) == -1 && !this.stop) {
             console.time('decode processing');
-            const start = performance.now();
             this.feed['input_ids'] = new ort.Tensor('int32', Int32Array.from([last_token]), [1, 1]);
             attn_mask = Array.from({ length: Math.min(this.start_len, this.max_cache) }, () => 1);
             attn_mask = this.padding_input(attn_mask, this.max_cache, true);
@@ -356,7 +374,7 @@ export class LLM {
                 outputs = await this.sess_1.run(this.feed);
                 last_token = outputs['token_id'].cpuData[0];
             }
-
+            console.log('next token: ', last_token);
             this.output_tokens.push(last_token);
             if (callback) {
                 callback(this.output_tokens);
